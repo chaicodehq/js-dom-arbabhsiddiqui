@@ -67,13 +67,131 @@
  *   // => [{ name: "Priya", side: "bride" }]
  */
 export function setupGuestList(containerElement) {
-  // Your code here
+  if (!containerElement) return null
+
+  const clickHandle = (e) => {
+    const removeButton = e.target.closest(".remove-btn")
+
+    if (!removeButton || !containerElement.contains(removeButton)) {
+      return
+    }
+    const guestItem = removeButton.closest(".guest-item")
+    if (guestItem) {
+      guestItem.remove()
+    }
+  }
+
+  containerElement.addEventListener("click", clickHandle)
+
+  return {
+    addGuest(name, side) {
+      const div = document.createElement("div")
+      div.classList.add("guest-item")
+      div.dataset.name = name
+      div.dataset.side = side
+
+      const span = document.createElement("span")
+      span.textContent = name
+
+      const btn = document.createElement("button")
+      btn.classList.add("remove-btn")
+      btn.textContent = "Remove"
+
+      div.appendChild(span)
+      div.appendChild(btn)
+
+      containerElement.appendChild(div)
+      return div
+    },
+
+    removeGuest(name) {
+      const guestItem = containerElement.querySelector(
+        `.guest-item[data-name="${name}"]`
+      )
+
+      if (!guestItem) return false
+
+      guestItem.remove()
+      return true
+    },
+
+    getGuests() {
+      const guests = containerElement.querySelectorAll(".guest-item")
+      return Array.from(guests).map((el) => ({
+        name: el.dataset.name,
+        side: el.dataset.side,
+      }))
+    },
+
+  }
 }
 
 export function setupThemeSelector(containerElement, previewElement) {
-  // Your code here
+  if (!containerElement || !previewElement) return null
+
+  const themeArray = ["traditional", "modern", "royal"]
+
+  themeArray.forEach((theme) => {
+    const btn = document.createElement("button")
+    btn.classList.add("theme-btn")
+    btn.dataset.theme = theme
+    btn.textContent = theme
+    containerElement.appendChild(btn)
+  })
+
+
+  const clickHandler = (e) => {
+    const btn = e.target.closest(".theme-btn")
+
+    if (!btn) return
+
+    const theme = btn.dataset.theme
+    previewElement.className = theme
+    previewElement.dataset.theme = theme
+  }
+
+  containerElement.addEventListener("click", clickHandler)
+
+  return {
+    getTheme() {
+      return previewElement.dataset.theme || null
+    },
+  }
+
 }
 
 export function setupCardEditor(cardElement) {
-  // Your code here
+  if (!cardElement) return null
+
+  const clear = () => {
+    const current = cardElement.querySelector(".editing")
+    if (!current) return
+    current.classList.remove("editing")
+    current.contentEditable = "false"
+  }
+
+  const clickHandler = (e) => {
+    const editable = e.target.closest("[data-editable]")
+
+    if (editable && cardElement.contains(editable)) {
+      clear()
+      editable.contentEditable = "true"
+      editable.classList.add("editing")
+    } else if (e.target === cardElement) {
+      clear()
+    }
+  }
+
+  cardElement.addEventListener("click", clickHandler)
+
+  return {
+    getContent(field) {
+      const el = cardElement.querySelector(
+        `[data-editable="${field}"]`
+      )
+      return el ? el.textContent : null
+    },
+  }
+
 }
+
